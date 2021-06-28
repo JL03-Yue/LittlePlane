@@ -1,28 +1,5 @@
-/****************************************************************************
- Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
- 
- http://www.cocos2d-x.org
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
- in the Software without restriction, including without limitation the rights
- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- copies of the Software, and to permit persons to whom the Software is
- furnished to do so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in
- all copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
- ****************************************************************************/
-
 #include "HelloWorldScene.h"
+#include <iostream>
 
 USING_NS_CC;
 
@@ -95,6 +72,7 @@ bool HelloWorld::init()
         // position the label on the center of the screen
         label->setPosition(Vec2(origin.x + visibleSize.width/2,
                                 origin.y + visibleSize.height - label->getContentSize().height));
+        label->setColor(Color3B(53, 53, 53));
 
         // add the label as a child to this layer
         this->addChild(label, 1);
@@ -109,11 +87,27 @@ bool HelloWorld::init()
     else
     {
         // position the sprite on the center of the screen
-        plane->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
-        plane->setScale(1/20.0);
+        planeHeight = visibleSize.height / 4 + origin.y;
+        plane->setPosition(Vec2(visibleSize.width/2 + origin.x, planeHeight));
+        plane->setScale(1/30.0);
 
         // add the sprite as a child to this layer
         this->addChild(plane, 1);
+    }
+
+    // add background
+    auto backGround = Sprite::create("C:/Users/Annie QY Li/Desktop/~/Cocos2dx/LittlePlane/Resources/background.jpg");
+    if (backGround == nullptr)
+    {
+        problemLoading("'background.jpg'");
+    }
+    else
+    {
+        backGround->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+        backGround->setScaleX((visibleSize.width / backGround->getContentSize().width) * 1);
+        backGround->setScaleY((visibleSize.height / backGround->getContentSize().height) * 1);
+        // add the sprite as a child to this layer
+        this->addChild(backGround, -100);
     }
 
     //add a touch event
@@ -131,7 +125,7 @@ bool HelloWorld::init()
         Point pos2 = Director::getInstance()->convertToGL(pos1);
 
         // Move a sprite to a specific location over 1 seconds.
-        auto moveTo = MoveTo::create(1, Vec2(pos2.x, pos2.y));
+        auto moveTo = MoveTo::create(1, Vec2(pos2.x, planeHeight));
         
         plane->runAction(moveTo);
         return true; // if you are consuming it
@@ -148,10 +142,32 @@ bool HelloWorld::init()
     // Add listener
     _eventDispatcher->addEventListenerWithSceneGraphPriority(planeListener,plane);
 
-    //set time update
+    //set time update using scheduler
+    //0.1f: interval of schedule
     this->schedule(CC_SCHEDULE_SELECTOR(HelloWorld::myUpdate), 0.1f);
 
 
+    ////####################################################################################################33
+    //// creating a keyboard event listener
+    //auto listener = EventListenerKeyboard::create();
+    //listener->onKeyPressed = CC_CALLBACK_2(KeyboardTest::onKeyPressed, this);
+    //listener->onKeyReleased = CC_CALLBACK_2(KeyboardTest::onKeyReleased, this);
+
+    //_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
+    //// Implementation of the keyboard event callback function prototype
+    //void KeyboardTest::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
+    //{
+    //    log("Key with keycode %d pressed", keyCode);
+    //}
+
+    //void KeyboardTest::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event)
+    //{
+    //    log("Key with keycode %d released", keyCode);
+    //}
+
+    srand((unsigned int)time(nullptr));
+    this->schedule(CC_SCHEDULE_SELECTOR(HelloWorld::addTarget), 1.5);
 
     return true;
 }
@@ -198,4 +214,35 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
     //_eventDispatcher->dispatchEvent(&customEndEvent);
 
 
+}
+
+void HelloWorld::addTarget(float dt)
+{
+    auto target = Sprite::create("targetT.png");
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    
+    target->setScaleX((visibleSize.width / target->getContentSize().width) * 0.1);
+    target->setScaleY((visibleSize.height / target->getContentSize().height) * 0.1);
+
+    // 1
+    auto targetContentSize = target->getContentSize();
+    auto selfContentSize = this->getContentSize ();
+    int minX = targetContentSize.width / 2 * 0.1;
+    int maxX = selfContentSize.width - targetContentSize.width / 2 * 0.1;
+    int rangeX = maxX - minX;
+    int randomX = (rand() % rangeX) + minX;
+
+    target->setPosition(Vec2(randomX, selfContentSize.height + targetContentSize.height / 2 * 0.1));
+    this->addChild(target);
+
+    // 2
+    int minDuration = 2.0;
+    int maxDuration = 4.0;
+    int rangeDuration = maxDuration - minDuration;
+    int randomDuration = (rand() % rangeDuration) + minDuration;
+
+    // 3
+    auto actionMove = MoveTo::create(randomDuration, Vec2(randomX , -targetContentSize.height / 2 * 0.1));
+    auto actionRemove = RemoveSelf::create();
+    target->runAction(Sequence::create(actionMove, actionRemove, nullptr));
 }

@@ -33,16 +33,19 @@ public:
     static cocos2d::Scene* createScene();
 
     virtual bool init();
-    
+
     // a selector callback
     void menuCloseCallback(cocos2d::Ref* pSender);
-    
+
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
     cocos2d::Sprite* plane;
     //update send bullet
     void myUpdate(float fdelta);
+private:
+    void addTarget(float dt);
+    int planeHeight;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
