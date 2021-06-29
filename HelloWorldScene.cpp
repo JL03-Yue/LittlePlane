@@ -149,22 +149,24 @@ bool HelloWorld::init()
 
     ////####################################################################################################33
     //// creating a keyboard event listener
-    //auto listener = EventListenerKeyboard::create();
-    //listener->onKeyPressed = CC_CALLBACK_2(KeyboardTest::onKeyPressed, this);
-    //listener->onKeyReleased = CC_CALLBACK_2(KeyboardTest::onKeyReleased, this);
-
-    //_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
-
-    //// Implementation of the keyboard event callback function prototype
-    //void KeyboardTest::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
-    //{
-    //    log("Key with keycode %d pressed", keyCode);
-    //}
-
-    //void KeyboardTest::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event)
-    //{
-    //    log("Key with keycode %d released", keyCode);
-    //}
+    auto keyboardListener = EventListenerKeyboard::create();
+    keyboardListener->onKeyPressed = [](EventKeyboard::KeyCode keyCode, Event* event) {
+        Vec2 loc = event->getCurrentTarget()->getPosition();
+        switch (keyCode) {
+        case EventKeyboard::KeyCode::KEY_LEFT_ARROW:
+        case EventKeyboard::KeyCode::KEY_A:
+            event->getCurrentTarget()->setPosition(--loc.x, loc.y);
+            break;
+        case EventKeyboard::KeyCode::KEY_RIGHT_ARROW:
+        case EventKeyboard::KeyCode::KEY_D:
+            event->getCurrentTarget()->setPosition(++loc.x, loc.y);
+            break;
+        /*case EventKeyboard::KeyCode::KEY_SPACE:
+            this->myUpdateOnce();
+            break;*/
+        }
+    };
+    this->_eventDispatcher->addEventListenerWithSceneGraphPriority(keyboardListener, plane);
 
     srand((unsigned int)time(nullptr));
     this->schedule(CC_SCHEDULE_SELECTOR(HelloWorld::addTarget), 1.5);
@@ -173,6 +175,36 @@ bool HelloWorld::init()
 }
 
 void HelloWorld::myUpdate(float fdelta)
+{
+    //log("myUpdate %f", fdelta);
+    Point pos = plane->getPosition();
+
+    // add plane
+    auto bullet = Sprite::create("bullet.png");
+    if (plane == nullptr)
+    {
+        problemLoading("'bullet.png'");
+    }
+    else
+    {
+        // position the sprite on the center of the screen
+        bullet->setPosition(pos);
+        bullet->setScale(1 / 15.0);
+
+        // bullet under the plane
+        this->addChild(bullet, 0);
+    }
+
+    //move the bullet up relatively by moveBy
+
+    auto moveBy = MoveBy::create(2, Vec2(0, 800));
+
+    bullet->runAction(moveBy);
+
+
+}
+
+void HelloWorld::myUpdateOnce()
 {
     //log("myUpdate %f", fdelta);
     Point pos = plane->getPosition();

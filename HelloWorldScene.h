@@ -43,6 +43,7 @@ public:
     cocos2d::Sprite* plane;
     //update send bullet
     void myUpdate(float fdelta);
+    void myUpdateOnce();
 private:
     void addTarget(float dt);
     int planeHeight;
